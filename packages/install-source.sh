@@ -1,7 +1,7 @@
 #!/bin/sh
 
 pip_url="https://bootstrap.pypa.io/get-pip.py"
-agent_url="https://github.com/nginxinc/nginx-amplify-agent"
+agent_url="https://github.com/akamoroz/nginx-amplify-agent"
 agent_conf_path="/etc/amplify-agent"
 agent_conf_file="${agent_conf_path}/agent.conf"
 nginx_conf_file="/etc/nginx/nginx.conf"
@@ -141,10 +141,11 @@ fi
 printf " Please select your OS: \n\n"
 echo " 1. FreeBSD 10"
 echo " 2. SLES 12"
-echo " 3. Alpine 3.3"
+echo " 3. Alpine 3.3 and 3.4"
 echo " 4. Fedora 24"
 echo " 5. Gentoo"
-echo " 6. Other"
+echo " 6. ARM64 (experimental build!)
+echo " 7. Other"
 echo ""
 printf " ==> "
 
@@ -217,7 +218,25 @@ case $line in
         test "${found_wget}" = "no" -a "${found_curl}" = "no" &&  ${sudo_cmd} emerge net-misc/wget
         test "${found_gcc}" = "no" && ${sudo_cmd} emerge sys-devel/gcc
         ;;
+    # ARM64
     6)
+        os="arm64"
+
+        check_packages
+        
+        echo "Experementa build for ARM64 architecture"
+        echo ""
+        echo "Before continuing with this installation script, please make sure that"
+        echo "the following extra packages are installed on your system: git, python 2.6 or 2.7,"
+        echo "python-dev, wget and gcc. Please install them manually if needed."
+        echo ""
+        printf "Continue (y/n)? "
+        read line
+        echo ""
+        test "${line}" = "y" -o "${line}" = "Y" || \
+            exit 1
+        ;;
+    7)
         echo "Before continuing with this installation script, please make sure that"
         echo "the following extra packages are installed on your system: git, python 2.6 or 2.7,"
         echo "python-dev, wget and gcc. Please install them manually if needed."
@@ -248,6 +267,7 @@ fi
 # Set up Python stuff
 ${downloader} ${pip_url}
 ${py_command} get-pip.py --user
+
 ~/.local/bin/pip install setuptools --upgrade --user
 
 # Clone the Amplify Agent repo
@@ -255,14 +275,19 @@ ${sudo_cmd} rm -rf nginx-amplify-agent
 git clone ${agent_url}
 
 # Install the Amplify Agent
+
+    
 cd nginx-amplify-agent
 
 if [ "${os}" = "fedora24" -a "${arch64}" = "yes" ]; then
     echo '[install]' > setup.cfg
     echo 'install-purelib=$base/lib64/python' >> setup.cfg
 fi
-
-~/.local/bin/pip install --upgrade --target=amplify --no-compile -r packages/requirements
+if [ "${os}" = "arm64" ]; then
+        ~/.local/bin/pip install --upgrade --target=amplify --no-compile -r packages/experimental_requirements
+    else
+        ~/.local/bin/pip install --upgrade --target=amplify --no-compile -r packages/requirements
+fi
 
 if [ "${os}" = "fedora24" -a "${arch64}" = "yes" ]; then
     rm setup.cfg
@@ -283,6 +308,8 @@ detect_amplify_user
 if ! grep ${amplify_user} /etc/passwd >/dev/null 2>&1; then
     if [ "${os}" = "freebsd10" ]; then
         ${sudo_cmd} pw user add ${amplify_user}
+    elif [ "${os}" = "alpine33" ]; then
+        ${sudo_cmd} adduser -S ${amplify_user}
     else
         ${sudo_cmd} useradd ${amplify_user}
     fi
