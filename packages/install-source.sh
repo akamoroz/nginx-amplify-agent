@@ -144,7 +144,7 @@ echo " 2. SLES 12"
 echo " 3. Alpine 3.3 and 3.4"
 echo " 4. Fedora 24"
 echo " 5. Gentoo"
-echo " 6. ARM64 (experimental build!)
+echo " 6. ARM64 (experimental build!)"
 echo " 7. Other"
 echo ""
 printf " ==> "
@@ -224,7 +224,7 @@ case $line in
 
         check_packages
         
-        echo "Experementa build for ARM64 architecture"
+        echo "Experimental install script for ARM64 architecture"
         echo ""
         echo "Before continuing with this installation script, please make sure that"
         echo "the following extra packages are installed on your system: git, python 2.6 or 2.7,"
