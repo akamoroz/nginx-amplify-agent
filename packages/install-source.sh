@@ -228,7 +228,7 @@ case $line in
         echo ""
         echo "Before continuing with this installation script, please make sure that"
         echo "the following extra packages are installed on your system: git, python 2.6 or 2.7,"
-        echo "python-dev, wget and gcc. Please install them manually if needed."
+        echo "python-dev, python-gevent, wget and gcc. Please install them manually if needed."
         echo ""
         printf "Continue (y/n)? "
         read line
@@ -284,7 +284,7 @@ if [ "${os}" = "fedora24" -a "${arch64}" = "yes" ]; then
     echo 'install-purelib=$base/lib64/python' >> setup.cfg
 fi
 if [ "${os}" = "arm64" ]; then
-        ~/.local/bin/pip install --upgrade --target=amplify --no-compile -r packages/experimental_requirements
+        ~/.local/bin/pip install --upgrade --target=amplify -r packages/experimental_requirements
     else
         ~/.local/bin/pip install --upgrade --target=amplify --no-compile -r packages/requirements
 fi
